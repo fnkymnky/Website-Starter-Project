@@ -1,0 +1,225 @@
+// My Mixins
+
+// =========================
+// LINEAR GRADIENT GENERATOR
+// =========================
+/// Convert angle
+/// @author Chris Eppstein
+/// @param {Number} $value - Value to convert
+/// @param {String} $unit - Unit to convert to
+/// @return {Number} Converted angle
+@function convert-angle($value, $unit) {
+  $convertable-units: deg grad turn rad;
+  $conversion-factors: 1 (10grad/9deg) (1turn/360deg) (3.1415926rad/180deg);
+  @if index($convertable-units, unit($value)) and index($convertable-units, $unit) {
+    @return $value
+             / nth($conversion-factors, index($convertable-units, unit($value)))
+             * nth($conversion-factors, index($convertable-units, $unit));
+  }
+
+  @warn "Cannot convert `#{unit($value)}` to `#{$unit}`.";
+}
+
+/// Test if `$value` is an angle
+/// @param {*} $value - Value to test
+/// @return {Bool}
+@function is-direction($value) {
+  $is-direction: index((to top, to top right, to right top, to right, to bottom right, to right bottom, to bottom, to bottom left, to left bottom, to left, to left top, to top left), $value);
+  $is-angle: type-of($value) == 'number' and index('deg' 'grad' 'turn' 'rad', unit($value));
+
+  @return $is-direction or $is-angle;
+}
+
+/// Convert a direction to legacy syntax
+/// @param {Keyword | Angle} $value - Value to convert
+/// @require {function} is-direction
+/// @require {function} convert-angle
+@function legacy-direction($value) {
+  @if is-direction($value) == false {
+    @warn "Cannot convert `#{$value}` to legacy syntax because it doesn't seem to be an angle or a direction";
+  }
+
+  $conversion-map: (
+    to top          : bottom,
+    to top right    : bottom left,
+    to right top    : left bottom,
+    to right        : left,
+    to bottom right : top left,
+    to right bottom : left top,
+    to bottom       : top,
+    to bottom left  : top right,
+    to left bottom  : right top,
+    to left         : right,
+    to left top     : right bottom,
+    to top left     : bottom right
+  );
+
+  @if map-has-key($conversion-map, $value) {
+    @return map-get($conversion-map, $value);
+  }
+
+  @return 90deg - convert-angle($value, 'deg');
+}
+
+/// Mixin printing a linear-gradient
+/// as well as a plain color fallback
+/// and the `-webkit-` prefixed declaration
+/// @access public
+/// @param {String | List | Angle} $direction - Linear gradient direction
+/// @param {Arglist} $color-stops - List of color-stops composing the gradient
+@mixin linear-gradient($direction, $color-stops...) {
+  @if is-direction($direction) == false {
+    $color-stops: ($direction, $color-stops);
+    $direction: 180deg;
+  }
+
+  background: nth(nth($color-stops, 1), 1);
+  background: -webkit-linear-gradient(legacy-direction($direction), $color-stops);
+  background: linear-gradient($direction, $color-stops);
+}
+
+// =======================
+// BORDER RADIUS GENERATOR
+//========================
+// Allows prefixed and tidy border radius creation on elements, without the need for exessive repetition.
+@mixin border-radius($topLeftRadius:0, $topRightRadius:0, $bottomLeftRadius:0, $bottomRightRadius:0) {
+  -moz-border-radius-topleft: $topLeftRadius;
+  -moz-border-radius-topright: $topRightRadius;
+  -moz-border-radius-bottomleft: $bottomLeftRadius;
+  -moz-border-radius-bottomright: $bottomRightRadius;
+
+  border-top-left-radius: $topLeftRadius;
+  border-top-right-radius: $topRightRadius;
+  border-bottom-left-radius: $bottomLeftRadius;
+  border-bottom-right-radius: $bottomRightRadius;
+}
+
+// ============
+// DISPLAY FLEX
+//=============
+// Set display: flex with progressive enhancement so that older browsers fall back to display: table
+@mixin display-flex() {
+  display: flex;
+}
+
+
+// ============
+// DISPLAY GRID
+// ============
+@mixin display-grid {
+  display: grid;
+}
+
+
+// ======================
+// SOFT TRANSITION EFFECT
+// ======================
+@mixin softTransition($property, $duration, $easing) {
+  -webkit-transition: $property, $duration $easing;
+  transition: $property, $duration $easing;
+}
+
+// ====================
+// BOX SHADOW GENERATOR
+// ====================
+// Allows prefixed and tidy box-shadow creation on elements
+@mixin box-shadow($string) {
+  -webkit-box-shadow: $string;
+  -moz-box-shadow:    $string;
+  box-shadow:         $string;
+}
+
+
+@mixin filter($filter-type,$filter-amount) {
+  -webkit-filter: $filter-type+unquote('(#{$filter-amount})');
+  -moz-filter: $filter-type+unquote('(#{$filter-amount})');
+  -ms-filter: $filter-type+unquote('(#{$filter-amount})');
+  -o-filter: $filter-type+unquote('(#{$filter-amount})');
+  filter: $filter-type+unquote('(#{$filter-amount})');
+}
+
+
+/*
+    This mixin allows us use CSS grid without having to think about
+    what -ms-grid-row/-ms-grid-column we have to assign to a grid element
+    for it to properly work on Internet Explorer and Edge.
+    It takes three arguments, the last one of which is optional. Specify the
+    maximum amount of items you want to have in your grid, when they should
+    break to the next line and, if you like, a grid-gap of some sort.
+    Make sure to use the same amount of arguments in -ms-grid-columns as in
+    $wrap-on, so it correctly breaks the line, eg. '1fr 2fr 1fr 2fr 1fr' and
+    '5'.
+    Usage:
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-gap: 10px;
+        display: -ms-grid;
+        -ms-grid-columns: 1fr 1fr 1fr;
+        &-item {
+            @include grid-ie-calc(15, 3, 10px);
+        }
+    }
+    See it in action here:
+    https://rbnlffl.synology.me/grid-ie-calc
+    Tested on:
+    IE 11, Edge 38, Chrome 58, Firefox 53, Safari 10, Opera 45
+*/
+
+@mixin grid-ie-calc($items: 30, $wrap-on: 3, $grid-gap: 0) {
+    $current-row: 1;
+    $current-column: 1;
+
+    @if $grid-gap > 0 {
+        & {
+            margin: $grid-gap / 2;
+
+            @supports (grid-gap: $grid-gap) {
+                margin: 0;
+            }
+        }
+    }
+
+    @for $i from 1 through $items {
+        @if $current-column > $wrap-on {
+            $current-column: 1;
+            $current-row: $current-row + 1;
+        }
+
+        &:nth-child(#{$i}) {
+            -ms-grid-row: $current-row;
+            -ms-grid-column: $current-column;
+        }
+
+        $current-column: $current-column + 1;
+    }
+}
+
+@mixin grid-ie-calc-with-featured-item($items: 30, $wrap-on: 3, $grid-gap: 0) {
+    $current-row: 2;
+    $current-column: 1;
+
+    @if $grid-gap > 0 {
+        & {
+            margin: $grid-gap / 2;
+
+            @supports (grid-gap: $grid-gap) {
+                margin: 0;
+            }
+        }
+    }
+
+    @for $i from 2 through $items {
+        @if $current-column > $wrap-on {
+            $current-column: 1;
+            $current-row: $current-row + 1;
+        }
+
+        &:nth-child(#{$i}) {
+            -ms-grid-row: $current-row;
+            -ms-grid-column: $current-column;
+        }
+
+        $current-column: $current-column + 1;
+    }
+}

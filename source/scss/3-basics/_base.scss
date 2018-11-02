@@ -1,0 +1,18 @@
+html {
+  box-sizing: border-box;
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+// This is set to relative to allow positioning of .back-to-top button
+body {
+	position: relative;
+}
+
+// Apply this class to prevent background scrolling when an overlay is active
+.overlay-active {
+  overflow: hidden;
+}

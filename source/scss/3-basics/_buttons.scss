@@ -1,0 +1,28 @@
+.btn {
+	@include border-radius(100px, 100px, 100px, 100px);
+	font-family: $roboto;
+}
+
+//
+// Sizes
+//
+.btn-group > .btn,
+.btn {
+	padding: 6px 20px;
+}
+
+.btn-group-xs > .btn, 
+.btn-xs {
+	padding: 1px 10px;
+}
+
+.btn-group-sm > .btn,
+.btn-sm {
+	padding: 5px 14px;
+}
+
+.btn-group-lg > .btn,
+.btn-lg {
+	padding: 10px 28px;
+	font-size: 16px;
+}

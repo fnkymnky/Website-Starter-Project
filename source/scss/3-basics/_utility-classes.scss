@@ -1,0 +1,48 @@
+.separator {
+  border-top: 1px solid lighten($grey, 20%);
+  border-bottom: 1px solid white;
+  width: 200px;
+  margin: 20px auto;
+  @media(min-width: $screen-sm) {
+    margin: 30px auto;
+  }
+  @media(min-width: $screen-md) {
+    margin: 40px auto;
+  }
+  @media(min-width: $screen-lg) {
+    margin: 50px auto;
+  }
+}
+
+a.skiptocontent  {
+    padding: 6px;
+    position: absolute;
+    top: -40px;
+    left: 0;
+    color: #FFF;
+    border-right: 1px solid white;
+    border-bottom: 1px solid white;
+    background: 0 0;
+    z-index: 10;
+    @include softTransition(all, .1s, ease);
+
+    &:focus {
+      position: absolute;
+      left: 0;
+      top: 0;
+      background: $ideagen-blue;;
+      outline: 0;
+      -webkit-transition: top .1s ease-in,background .5s linear;
+      transition: top .1s ease-in,background .5s linear;
+    }
+}
+
+.embedded-video-player {
+	background: url(../images/site-core/utilities/loading.gif) center center no-repeat #FFF;
+}
+
+// Fix for .x px black line that appears on edge of video
+// Due to 56.25% padding on the embed class
+.embed-responsive-16by9 {
+	clip-path: inset(1px 1px);
+}

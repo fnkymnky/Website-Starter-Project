@@ -1,0 +1,25 @@
+.table-branded {
+	border-top-color: $ideagen-blue;
+
+	thead tr {
+		background: $ideagen-blue;
+		color: white;
+
+		td {
+			border-color: $ideagen-blue;
+			padding: 14px 20px;
+		}
+	}
+
+	tbody {
+		background: white;
+
+		tr td {
+			padding: 15px 20px 10px;
+		}
+
+		p {
+			font-size: 14px;
+		}
+	}
+}
