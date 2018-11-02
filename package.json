@@ -7,7 +7,6 @@
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "Steven McCurrach",
-    "license": "Creative Commons",
     "devDependencies": {
         "browser-sync": "^2.26.3",
         "del": "^3.0.0",
